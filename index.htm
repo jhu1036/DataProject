@@ -1,0 +1,134 @@
+<!doctype html>
+
+<head>
+    <title>FDNY Firehouse Listings</title>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> 
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC4rBWLjCb2UqXieMcTnOJgSAr9e4xn_Wo"></script>
+
+<style>
+    .searchcontain{
+        text-align: center;
+        background-color: #E46E74; 
+
+    } 
+    #page .panel{
+        width:300px;        
+        margin:20px;
+        border-radius:10px; box-shadow:white 5px 5px;
+        display:inline-block;
+    
+    }
+    #page .panel-heading{
+        background-color:   #FFA49A;  font-size:14pt;
+        padding:10px;       font-family:"Impact";
+        text-shadow:#F17E73 1px 1px 1px;
+        text-align: center;
+    }
+    #page .panel-body{
+        background-color:#FA9191;font-size:10pt;
+        padding:10px;       font-family:"Impact";
+        float:center;        
+    }
+    #page .panel-footer{
+        background-color:#F1949C;
+        padding:8px;       font-family:"Impact";        
+    }
+    p,a{
+        font-size:14pt;
+        font-family:"Impact";
+    }
+    button{
+        font-weight:bold;   border-radius:10px;
+        color:white;      background-color:rgb(0, 162, 255);            
+        padding:5px;        box-shadow:black 5px 5px 5px;   
+        cursor: pointer;       
+    }
+    #googleMap{
+        height:515px;   width: 100%;
+        float:center;
+        border:2px solid white; 
+    }
+    body{
+        background: #ff9966;
+        background: -webkit-linear-gradient(to right, #ff9966, #ff5e62);
+        background: linear-gradient(to right, #ff9966, #ff5e62);
+
+    }
+    h1{
+        font-family:"Impact";
+    }
+
+</style>
+
+
+<script type="text/template" id="crashTemplate">
+    
+    <div class='panel panel-default'>
+        <div class='panel-heading'><p>{{facilityname}}</p></div> 
+        <div class='panel-body'><p>{{facilityaddress}}<br>{{borough}}<br>
+            {{postcode}}</p>
+            </div>     
+        <div class='panel-footer'>
+            lat: {{latitude}}<br>lon: {{longitude}}
+            <button onclick="GoogMap( {{latitude}}, {{longitude}} )">map it</button>   
+        </div>
+    </div>
+</script>
+
+<script>
+ 
+function loadJSON(){        
+    $.getJSON("https://data.cityofnewyork.us/resource/byk8-bdfw.json", function(result){        
+        displayInfo(result);
+    }); 
+}
+function displayInfo(data){
+    var build = "";
+    var output = document.getElementById("op");
+    var crash = document.getElementById("crash").value;
+    var template = document.getElementById("crashTemplate").innerHTML;
+    
+    for(i=0; i<data.length; i++){
+        try{        
+        if (data[i].borough.toLowerCase().indexOf( crash.toLowerCase() ) != -1){
+            build += Mustache.render(template, data[i]);
+        }
+        }catch(err){
+            
+        }
+    }
+    output.innerHTML = build;    
+}
+
+function GoogMap(lat, lon){
+    var gMap = document.getElementById("googleMap");
+    var mapProp= {
+            center:new google.maps.LatLng(lat, lon),
+            zoom:18,
+        };
+    var map=new google.maps.Map(gMap,mapProp);
+}
+
+</script>
+
+</head>
+
+<body id="page">
+    <div class="container">
+        <div class="searchcontain">
+            <h1>FDNY Firehouses</h1> 
+            <p>Search a Borough: <input type="text" id="crash" placeholder="enter borough"></p>
+            <button onclick="loadJSON()">search</button>            
+        </div> 
+        <div id="googleMap"></div>
+        <div id="op"></div>
+    </div>
+</body>
+
+</html>
